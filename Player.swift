@@ -33,17 +33,7 @@ class Player: SCNNode {
         //physicsBody?.velocity = SCNVector3(0, 0, 0)
         self.physicsBody?.mass = 60
         
-        
-        let backBox = SCNBox(width: CGFloat(Cube.side), height: CGFloat(Cube.side), length: 0.1, chamferRadius: 0)
-        let backNode = SCNNode(geometry: backBox)
-        backNode.position = SCNVector3Make(0, 0, Float(Cube.side) / 2 + Float(Cube.side * 4) + 1 / 2)
-        backNode.physicsBody = SCNPhysicsBody(type: .kinematic, shape: SCNPhysicsShape(geometry: backBox, options: nil))
-        backNode.geometry?.firstMaterial?.diffuse.contents = UIColor.white
-        backNode.physicsBody?.categoryBitMask = PhysicsCategory.backPlayerNode.rawValue
-        backNode.physicsBody?.contactTestBitMask = PhysicsCategory.worldPieceFrontEdge.rawValue
-        backNode.name = "playerBackNode"
-        //backNode.isHidden = true
-        self.addChildNode(backNode)
+    
     }
     
     func update() {
@@ -63,19 +53,18 @@ class Player: SCNNode {
     }
     
     func jump() {
-        let a = SCNAction.run { i in
-            i.physicsBody?.type = .kinematic
-        }
-        let b = SCNAction.run { i in
-            i.physicsBody?.type = .dynamic
-        }
-        let bounceUpAction = SCNAction.moveBy(x: 0, y: CGFloat(Cube.side), z: 0, duration: 1)
-        let bounceDownAction = SCNAction.moveBy(x: 0, y: -CGFloat(Cube.side), z: 0, duration: 0.5)
-        let bounceAction = SCNAction.sequence([a, bounceUpAction, bounceDownAction, b])
-        runAction(bounceAction)
-        //physicsBody?.mass = 60
-        //physicsBody?.type = .dynamic
-        //physicsBody?.applyForce(SCNVector3(0, 2400, 0), asImpulse: true)
+//        let a = SCNAction.run { i in
+//            i.physicsBody?.type = .kinematic
+//        }
+//        let b = SCNAction.run { i in
+//            i.physicsBody?.type = .dynamic
+//        }
+//        let bounceUpAction = SCNAction.moveBy(x: 0, y: CGFloat(Cube.side), z: 0, duration: 1)
+//        let bounceDownAction = SCNAction.moveBy(x: 0, y: -CGFloat(Cube.side), z: 0, duration: 0.5)
+//        let bounceAction = SCNAction.sequence([a, bounceUpAction, bounceDownAction, b])
+//        runAction(bounceAction)
+        physicsBody?.applyForce(SCNVector3Make(0, 2500, 0), asImpulse: true) 
+        
     }
    
     

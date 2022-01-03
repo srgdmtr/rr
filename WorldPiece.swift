@@ -20,7 +20,7 @@ class WorldPiece: SCNNode {
     var index: Int = 0
     var cubes: [[[Cube]]] = []
     let moveForwardAction = SCNAction.repeatForever(SCNAction.move(by: SCNVector3(0, 0, 10), duration: 1))
-    var frontCollisionPlaneNode = SCNNode()
+    var frontContactPlaneNode = SCNNode()
     
     
     override init() {
@@ -35,18 +35,18 @@ class WorldPiece: SCNNode {
         initCubes()
         
         let collisionEdge = SCNBox(width: pieceSide, height: pieceSide, length: 0, chamferRadius: 0)
-        frontCollisionPlaneNode = SCNNode(geometry: collisionEdge)
-        frontCollisionPlaneNode.position = SCNVector3Make(0, 0.1, Float(pieceSide / 2))
+        frontContactPlaneNode = SCNNode(geometry: collisionEdge)
+        frontContactPlaneNode.position = SCNVector3Make(0, 0.1, Float(pieceSide / 2))
 
-        frontCollisionPlaneNode.physicsBody = SCNPhysicsBody(type: .kinematic, shape: SCNPhysicsShape(geometry: collisionEdge, options: nil))
-        frontCollisionPlaneNode.geometry?.firstMaterial?.diffuse.contents = UIColor.clear
+        frontContactPlaneNode.physicsBody = SCNPhysicsBody(type: .kinematic, shape: SCNPhysicsShape(geometry: collisionEdge, options: nil))
+        frontContactPlaneNode.geometry?.firstMaterial?.diffuse.contents = UIColor.clear
         //frontCollisionPlaneNode.opacity = 0.5
-        frontCollisionPlaneNode.physicsBody?.categoryBitMask = PhysicsCategory.worldPieceFrontEdge.rawValue
-        frontCollisionPlaneNode.physicsBody?.contactTestBitMask = PhysicsCategory.backPlayerNode.rawValue
+        frontContactPlaneNode.physicsBody?.categoryBitMask = PhysicsCategory.worldPieceFrontEdge.rawValue
+        frontContactPlaneNode.physicsBody?.contactTestBitMask = PhysicsCategory.worldUpdtaeTriggerNode.rawValue
         //frontCollisionPlaneNode.physicsBody?.collisionBitMask = PhysicsCategory.player.rawValue
-        frontCollisionPlaneNode.name = "worldPieceFrontEdge"
-        frontCollisionPlaneNode.physicsBody!.mass = 0
-        addChildNode(frontCollisionPlaneNode)
+        frontContactPlaneNode.name = "frontContactPlaneNode"
+        frontContactPlaneNode.physicsBody!.mass = 0
+        addChildNode(frontContactPlaneNode)
     }
     
     private func initCubes() {

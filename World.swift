@@ -59,12 +59,12 @@ class World: SCNNode {
                     }
                 }
             }
-            
-            let c = worldPiece.getCube(0, 2, 0)
+            let range = 0...3
+            let c = worldPiece.getCube(Int.random(in: range), Int.random(in: range), Int.random(in: range))
             c.physicsBody = SCNPhysicsBody(type: .kinematic, shape: nil)
             c.physicsBody?.categoryBitMask = PhysicsCategory.obstacle.rawValue
             c.physicsBody?.contactTestBitMask = PhysicsCategory.player.rawValue
-            //c.physicsBody?.collisionBitMask = PhysicsCategory.player.rawValue
+            c.physicsBody?.collisionBitMask = PhysicsCategory.player.rawValue
             c.setColor(.red)
             c.name = "obstacle"
             pieces.append(worldPiece)

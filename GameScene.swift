@@ -11,7 +11,7 @@ import SpriteKit
 
 public enum PhysicsCategory: Int {
     case player = 1
-    case backPlayerNode = 2
+    case worldUpdtaeTriggerNode = 2
     
     case staticCube = 4
     
@@ -23,6 +23,7 @@ public enum PhysicsCategory: Int {
     case world = 64
     case obstacle = 128
     case enemy = 256
+    case shoot = 512
 }
 
 
@@ -32,7 +33,7 @@ class GameScene: SCNScene, SCNPhysicsContactDelegate {
     let player = Player()
     let world = World()
     let cameraNode = SCNNode()
-    var backNode = SCNNode()
+    var worldUpdtaeTriggerNode = WorldUpdtaeTriggerNode()
             
     init(currentview view: SCNView) {
         super.init()
@@ -58,7 +59,7 @@ class GameScene: SCNScene, SCNPhysicsContactDelegate {
         sceneView.backgroundColor = .blue
         
         setupLight()
-        //addGround()
+        addGround()
         
         rootNode.addChildNode(world)
         world.addChildNode(player)
@@ -68,11 +69,14 @@ class GameScene: SCNScene, SCNPhysicsContactDelegate {
         let c = world.pieces[world.pieces.count - 1].getCube(0, 0, 0)
         player.position = SCNVector3(x: c.position.x, y: -pieceSide / 2 + Float(Cube.side / 2) + Float(Cube.side), z: lenght / 2 - Float(Cube.side / 2))
         
+        world.addChildNode(worldUpdtaeTriggerNode)
+        worldUpdtaeTriggerNode.position = SCNVector3(0, 0, player.presentation.position.z + Float(Cube.side * 3))
+        
         cameraNode.camera = SCNCamera()
         world.addChildNode(cameraNode)
         cameraNode.camera?.zFar = 500
-        cameraNode.position = SCNVector3(x: 0, y: Float(Cube.side), z: player.position.z + Float(Cube.side * 6))
-        //cameraNode.eulerAngles.y -= Float(Double.pi)
+        cameraNode.position = SCNVector3(x: 0, y: Float(Cube.side) * 3, z: player.position.z + Float(Cube.side * 4))
+        cameraNode.eulerAngles.x = -.pi / 6
 
         
         world.handleMovement(true)
@@ -122,7 +126,7 @@ class GameScene: SCNScene, SCNPhysicsContactDelegate {
         let nodes = [contact.nodeA, contact.nodeB]
         
         if let pbni = nodes.firstIndex(where: {
-            $0.physicsBody?.categoryBitMask == PhysicsCategory.backPlayerNode.rawValue
+            $0.physicsBody?.categoryBitMask == PhysicsCategory.worldUpdtaeTriggerNode.rawValue
         }) {
             let contactNode = nodes[pbni == 0 ? 1 : 0]
             if contactNode.physicsBody?.categoryBitMask == PhysicsCategory.worldPieceFrontEdge.rawValue {
@@ -138,17 +142,35 @@ class GameScene: SCNScene, SCNPhysicsContactDelegate {
         }) {
             let playerNode = nodes[pi] as! Player
             let contactNode = nodes[pi == 0 ? 1 : 0]
-            
-            print("\(playerNode.name) : \(playerNode.categoryBitMask) : \(playerNode.presentation.convertPosition(SCNVector3(0.5, 0.5, 0.5), to: rootNode))")
-            print("\(contactNode.name) : \(contactNode.categoryBitMask) : \(contactNode.presentation.convertPosition(SCNVector3(0.5, 0.5, 0.5), to: rootNode))")
-            
             switch contactNode.physicsBody!.categoryBitMask {
                 case PhysicsCategory.obstacle.rawValue:
-                    contactNode.geometry?.firstMaterial?.diffuse.contents = UIColor.white
-                    self.world.pieces.forEach {
-                        $0.handleMovement(false)
+                    print("\(playerNode.name) : \(playerNode.categoryBitMask) : \(playerNode.presentation.convertPosition(SCNVector3(0.5, 0.5, 0.5), to: rootNode))")
+                    print("\(contactNode.name) : \(contactNode.categoryBitMask) : \(contactNode.presentation.convertPosition(SCNVector3(0.5, 0.5, 0.5), to: rootNode))")
+                    
+                  
+                    let playerPos = playerNode.presentation.convertPosition(SCNVector3(0.5, 0.5, 0.5), to: self.world)
+                    let nodePos = contactNode.presentation.convertPosition(SCNVector3(0.5, 0.5, 0.5), to: self.world)
+                    let r = (0.6844 * 1000).rounded() / 1000
+                    
+                    let pym = (playerPos.y * 1000).rounded() / 1000
+                    let nym = (nodePos.y * 1000).rounded() / 1000
+                    
+                    let dx = (pym - nym).magnitude
+                    
+                    let dy = (playerPos.y - nodePos.y).magnitude
+                    let dz = playerPos.z - nodePos.z
+                    
+                    if dz <= Float(Cube.side) && dx < 0.1 && dy < Float(Cube.side / 2) {
+                        contactNode.geometry?.firstMaterial?.diffuse.contents = UIColor.white
+                        self.world.pieces.forEach {
+                            $0.handleMovement(false)
+                        }
+                        endGame()
                     }
-                    endGame()
+                    
+                    
+                   
+                    
             default :
                 break
             }

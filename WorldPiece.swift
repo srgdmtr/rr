@@ -6,6 +6,7 @@
 //
 
 import SceneKit
+import GameplayKit
 
 protocol WorldPieceDelegate: AnyObject {
     func playerDidEnterPiece(with index: Int)
@@ -50,6 +51,23 @@ class WorldPiece: SCNNode {
     }
     
     private func initCubes() {
+        let noiseMap = createNoiseMap()
+//
+//        var arrX: [[[Cube]]] = []
+//        let range = 0..<WorldPiece.cubesInRow
+//        let ridgeLength = Float(Cube.side * WorldPiece.cubesInRow)
+//        let cs = Float(Cube.side)
+//        let corr: Float = (ridgeLength - cs) / 2
+//
+//        let slices: [[[Cube]]] = []
+//
+        
+        
+        
+        
+        
+        
+        
         var arrX: [[[Cube]]] = []
         let range = 0..<WorldPiece.cubesInRow
         let ridgeLength = Float(Cube.side * WorldPiece.cubesInRow)
@@ -64,12 +82,23 @@ class WorldPiece: SCNNode {
                     arrZ.append(cube)
                     self.addChildNode(cube)
                     cube.position = SCNVector3(Float(x) * cs - corr, Float(y) * cs - corr, Float(z) * cs - corr)
+//                    if cube.index.0 == 0 {
+//                        cube.geometry!.firstMaterial?.diffuse.contents = UIColor.yellow
+//                    }
                 }
                 arrY.append(arrZ)
             }
             arrX.append(arrY)
         }
         cubes = arrX
+    }
+    
+    func createNoiseMap() -> GKNoiseMap {
+        let source = GKRidgedNoiseSource(frequency: 0.2, octaveCount: 3, lacunarity: 4.2, seed: 437)
+        let noise = GKNoise.init(source)
+        let map = GKNoiseMap.init(noise, size: vector2(1.0, 1.0), origin: vector2(0, 0), sampleCount: vector2(5, 5), seamless: false)
+        return map
+        
     }
 
     func handleMovement(_ enable: Bool) {

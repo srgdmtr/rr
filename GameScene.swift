@@ -59,7 +59,7 @@ class GameScene: SCNScene, SCNPhysicsContactDelegate {
         sceneView.backgroundColor = .blue
         
         setupLight()
-        addGround()
+        //addGround()
         
         rootNode.addChildNode(world)
         world.addChildNode(player)
@@ -150,15 +150,21 @@ class GameScene: SCNScene, SCNPhysicsContactDelegate {
                   
                     let playerPos = playerNode.presentation.convertPosition(SCNVector3(0.5, 0.5, 0.5), to: self.world)
                     let nodePos = contactNode.presentation.convertPosition(SCNVector3(0.5, 0.5, 0.5), to: self.world)
-                    let r = (0.6844 * 1000).rounded() / 1000
                     
                     let pym = (playerPos.y * 1000).rounded() / 1000
                     let nym = (nodePos.y * 1000).rounded() / 1000
                     
-                    let dx = (pym - nym).magnitude
+                    let pxm = (playerPos.x * 1000).rounded() / 1000
+                    let nxm = (nodePos.x * 1000).rounded() / 1000
                     
-                    let dy = (playerPos.y - nodePos.y).magnitude
-                    let dz = playerPos.z - nodePos.z
+                    let pzm = (playerPos.z * 1000).rounded() / 1000
+                    let nzm = (nodePos.z * 1000).rounded() / 1000
+                    
+                    
+                    let dx = (pxm - nxm).magnitude
+                    let dy = (pym - nym).magnitude
+                    let dz = (pzm - nzm).magnitude
+            
                     
                     if dz <= Float(Cube.side) && dx < 0.1 && dy < Float(Cube.side / 2) {
                         contactNode.geometry?.firstMaterial?.diffuse.contents = UIColor.white
@@ -187,6 +193,9 @@ class GameScene: SCNScene, SCNPhysicsContactDelegate {
             }
         }
     }
+    
+    
+
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")

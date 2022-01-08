@@ -59,26 +59,24 @@ class GameScene: SCNScene, SCNPhysicsContactDelegate {
         sceneView.backgroundColor = .blue
         
         setupLight()
-        //addGround()
         
         rootNode.addChildNode(world)
+        world.position = SCNVector3(0, 0, -world.boundingBox.max.z / 2)
+        
+        let pieceLength = Float(Cube.side * PerlinWorldPiece.length)
+        let averageLenght = pieceLength * Float(world.piecesCount)
         world.addChildNode(player)
-        
-        let pieceSide = Float(Cube.side * WorldPiece.cubesInRow)
-        let lenght = pieceSide * Float(world.piecesCount)
-        let c = world.pieces[world.pieces.count - 1].getCube(0, 0, 0)
-        player.position = SCNVector3(x: c.position.x, y: -pieceSide / 2 + Float(Cube.side / 2) + Float(Cube.side), z: lenght / 2 - Float(Cube.side / 2))
-        
+        player.position = SCNVector3(x: 0, y:  Float(Cube.side) * 2, z: averageLenght / 2 - Float(Cube.side / 2))
+
         world.addChildNode(worldUpdtaeTriggerNode)
-        worldUpdtaeTriggerNode.position = SCNVector3(0, 0, player.presentation.position.z + Float(Cube.side * 3))
-        
+        worldUpdtaeTriggerNode.position = SCNVector3(0, 0, player.position.z + Float(Cube.side * 3))
+
         cameraNode.camera = SCNCamera()
         world.addChildNode(cameraNode)
         cameraNode.camera?.zFar = 500
-        cameraNode.position = SCNVector3(x: 0, y: Float(Cube.side) * 3, z: player.position.z + Float(Cube.side * 4))
+        cameraNode.position = SCNVector3(x: 0, y: Float(Cube.side) * 4, z: player.position.z + Float(Cube.side * 8))
         cameraNode.eulerAngles.x = -.pi / 6
 
-        
         world.handleMovement(true)
         
     }
@@ -111,7 +109,7 @@ class GameScene: SCNScene, SCNPhysicsContactDelegate {
     private func addGround() {
         let groundBox = SCNBox(width: CGFloat(Cube.side * 400), height: 1, length: CGFloat(Cube.side * 160), chamferRadius: 0)
         let groundNode = SCNNode(geometry: groundBox)
-        groundNode.position = SCNVector3Make(0, -Float(Cube.side * WorldPiece.cubesInRow) / 2 - 1 / 2, 0)
+        groundNode.position = SCNVector3Make(0, -Float(Cube.side * PerlinWorldPiece.width) / 2 - 1 / 2, 0)
         //groundNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: groundBox, options: nil))
         //groundNode.physicsBody?.restitution = 0.0
         //groundNode.physicsBody?.friction = 1.0
@@ -131,7 +129,7 @@ class GameScene: SCNScene, SCNPhysicsContactDelegate {
             let contactNode = nodes[pbni == 0 ? 1 : 0]
             if contactNode.physicsBody?.categoryBitMask == PhysicsCategory.worldPieceFrontEdge.rawValue {
                 contactNode.physicsBody = nil
-                if (contactNode.parent as? WorldPiece) != nil {
+                if (contactNode.parent as? PerlinWorldPiece) != nil {
                     self.world.update()
                 }
             }
@@ -143,7 +141,7 @@ class GameScene: SCNScene, SCNPhysicsContactDelegate {
             let playerNode = nodes[pi] as! Player
             let contactNode = nodes[pi == 0 ? 1 : 0]
             switch contactNode.physicsBody!.categoryBitMask {
-                case PhysicsCategory.obstacle.rawValue:
+                case PhysicsCategory.staticCube.rawValue:
                     print("\(playerNode.name) : \(playerNode.categoryBitMask) : \(playerNode.presentation.convertPosition(SCNVector3(0.5, 0.5, 0.5), to: rootNode))")
                     print("\(contactNode.name) : \(contactNode.categoryBitMask) : \(contactNode.presentation.convertPosition(SCNVector3(0.5, 0.5, 0.5), to: rootNode))")
                     
@@ -173,9 +171,6 @@ class GameScene: SCNScene, SCNPhysicsContactDelegate {
                         }
                         endGame()
                     }
-                    
-                    
-                   
                     
             default :
                 break
@@ -208,7 +203,7 @@ extension GameScene: OverlaySceneDelegate {
             case .left:
                 player.moveTo(.left)
             case .down:
-                print("")
+                print("down")
             case .right:
                 player.moveTo(.right)
             case .up:

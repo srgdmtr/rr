@@ -58,13 +58,11 @@ class OverlayScene: SKScene {
         
         let touchedNodes = nodes(at: location)
         let frontTouchedNode = atPoint(location).name
-        
-        print("")
     }
+    
+    
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
     
-        
-        
     }
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
     

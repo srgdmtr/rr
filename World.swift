@@ -12,8 +12,8 @@ enum Row: Int {
 }
 
 class World: SCNNode {
-    var pieces: [WorldPiece] = []
-    let piecesCount: Int = 7
+    var pieces: [PerlinWorldPiece] = []
+    let piecesCount: Int = 6
 
     private lazy var playerNode = {
         self.parent!.childNode(withName: "player", recursively: false) as! Player
@@ -22,51 +22,17 @@ class World: SCNNode {
     override init() {
         super.init()
         
-        let pieceSide = CGFloat(Cube.side * WorldPiece.cubesInRow)
-        let box = SCNBox(width: pieceSide, height: pieceSide, length: pieceSide * CGFloat(piecesCount), chamferRadius: 0)
+        let pieceSide = CGFloat(Cube.side * PerlinWorldPiece.width)
+        let pieceLength = CGFloat(Cube.side * PerlinWorldPiece.length)
+        let box = SCNBox(width: pieceSide, height: pieceSide, length: pieceLength * CGFloat(piecesCount), chamferRadius: 0)
         self.geometry = box
         self.name = "world"
         self.geometry?.firstMaterial?.diffuse.contents = UIColor.clear
 
         for i in 0..<piecesCount {
-            let worldPiece = WorldPiece()
-            worldPiece.delegate = self
-            worldPiece.index = i
+            let worldPiece = PerlinWorldPiece()
             addChildNode(worldPiece)
-            worldPiece.position = SCNVector3(0 , 0, Float(i) * Float(pieceSide) - Float(pieceSide * CGFloat(piecesCount) / 2) + Float(pieceSide / 2))
-            if i == piecesCount - 1 {
-                for j in 0..<WorldPiece.cubesInRow {
-                    worldPiece.getRow(j, 0).forEach {
-                        $0.physicsBody = SCNPhysicsBody(type: .kinematic, shape: nil)
-                        $0.physicsBody?.categoryBitMask = PhysicsCategory.staticCube.rawValue
-                        //$0.physicsBody?.contactTestBitMask = PhysicsCategory.player.rawValue
-                        //$0.physicsBody?.collisionBitMask = PhysicsCategory.player.rawValue
-                        $0.setColor(.systemOrange)
-                        $0.name = "staticCube"
-                    }
-                }
-            } else {
-                for j in 0..<WorldPiece.cubesInRow {
-                    worldPiece.getRow(j, 0).forEach {
-                        if j != 2 {
-                            $0.physicsBody = SCNPhysicsBody(type: .kinematic, shape: nil)
-                            $0.physicsBody?.categoryBitMask = PhysicsCategory.staticCube.rawValue
-                            //$0.physicsBody?.contactTestBitMask = PhysicsCategory.player.rawValue
-                            //$0.physicsBody?.collisionBitMask = PhysicsCategory.player.rawValue
-                            $0.setColor(.systemOrange)
-                            $0.name = "staticCube"
-                        }
-                    }
-                }
-            }
-            let range = 0...3
-            let c = worldPiece.getCube(Int.random(in: range), Int.random(in: range), Int.random(in: range))
-            c.physicsBody = SCNPhysicsBody(type: .kinematic, shape: nil)
-            c.physicsBody?.categoryBitMask = PhysicsCategory.obstacle.rawValue
-            c.physicsBody?.contactTestBitMask = PhysicsCategory.player.rawValue
-            c.physicsBody?.collisionBitMask = PhysicsCategory.player.rawValue
-            c.setColor(.red)
-            c.name = "obstacle"
+            worldPiece.position = SCNVector3(0 , 0, Float(i) * Float(pieceLength) - Float(pieceLength * CGFloat(piecesCount) / 2) + Float(pieceLength / 2))
             pieces.append(worldPiece)
         }
     }
@@ -78,35 +44,15 @@ class World: SCNNode {
             pieces.remove(at: i)
         }
         let firstPos = pieces.first!.position.z
-        let worldPiece = WorldPiece()
-        for j in 0..<WorldPiece.cubesInRow {
-            worldPiece.getRow(j, 0).forEach {
-                if j != 2 {
-                    $0.physicsBody = SCNPhysicsBody(type: .kinematic, shape: nil)
-                    $0.physicsBody?.categoryBitMask = PhysicsCategory.ground.rawValue
-                    //$0.physicsBody?.contactTestBitMask = PhysicsCategory.player.rawValue
-                    //$0.physicsBody?.collisionBitMask = PhysicsCategory.player.rawValue
-                    $0.setColor(.systemOrange)
-                    $0.name = "ground"
-                }
-            }
-        }
-        
-        worldPiece.delegate = self
-        pieces.forEach {
-            $0.index += 1
-        }
-        worldPiece.index = 0
+        let worldPiece = PerlinWorldPiece()
         addChildNode(worldPiece)
-        worldPiece.position = SCNVector3(0 , 0, firstPos - Float(Cube.side * 4))
+        worldPiece.position = SCNVector3(0 , 0, firstPos - Float(Cube.side * PerlinWorldPiece.length))
         pieces.insert(worldPiece, at: 0)
         
         worldPiece.handleMovement(true)
     }
     
-    func tmpSetRoad() {
-        
-    }
+   
         
     func handleMovement(_ enable: Bool) {
         pieces.forEach {
@@ -119,8 +65,3 @@ class World: SCNNode {
     }
 }
 
-extension World: WorldPieceDelegate {
-    func playerDidEnterPiece(with index: Int) {
-
-    }
-}

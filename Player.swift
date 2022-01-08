@@ -24,8 +24,8 @@ class Player: SCNNode {
         
         self.physicsBody = SCNPhysicsBody(type: .dynamic, shape: SCNPhysicsShape(geometry: box, options: nil))
         self.physicsBody?.categoryBitMask = PhysicsCategory.player.rawValue
-        //self.physicsBody?.collisionBitMask = PhysicsCategory.staticCube.rawValue
-        self.physicsBody?.contactTestBitMask = PhysicsCategory.obstacle.rawValue
+        self.physicsBody?.collisionBitMask = PhysicsCategory.staticCube.rawValue
+        self.physicsBody?.contactTestBitMask = PhysicsCategory.staticCube.rawValue
         self.geometry?.firstMaterial?.diffuse.contents = UIColor.black
         self.physicsBody?.velocityFactor = SCNVector3(0, 1, 0)
         self.physicsBody?.angularVelocityFactor = SCNVector3(0, 0, 0)
@@ -63,7 +63,7 @@ class Player: SCNNode {
 //        let bounceDownAction = SCNAction.moveBy(x: 0, y: -CGFloat(Cube.side), z: 0, duration: 0.5)
 //        let bounceAction = SCNAction.sequence([a, bounceUpAction, bounceDownAction, b])
 //        runAction(bounceAction)
-        physicsBody?.applyForce(SCNVector3Make(0, 2500, 0), asImpulse: true) 
+        physicsBody?.applyForce(SCNVector3Make(0, 3000, 0), asImpulse: true) 
         
     }
    

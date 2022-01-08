@@ -77,7 +77,7 @@ class GameScene: SCNScene, SCNPhysicsContactDelegate {
         cameraNode.position = SCNVector3(x: 0, y: Float(Cube.side) * 4, z: player.position.z + Float(Cube.side * 8))
         cameraNode.eulerAngles.x = -.pi / 6
 
-        world.handleMovement(true)
+        //world.handleMovement(true)
         
     }
     
@@ -142,9 +142,9 @@ class GameScene: SCNScene, SCNPhysicsContactDelegate {
             let contactNode = nodes[pi == 0 ? 1 : 0]
             switch contactNode.physicsBody!.categoryBitMask {
                 case PhysicsCategory.staticCube.rawValue:
-                    print("\(playerNode.name) : \(playerNode.categoryBitMask) : \(playerNode.presentation.convertPosition(SCNVector3(0.5, 0.5, 0.5), to: rootNode))")
-                    print("\(contactNode.name) : \(contactNode.categoryBitMask) : \(contactNode.presentation.convertPosition(SCNVector3(0.5, 0.5, 0.5), to: rootNode))")
-                    
+//                    print("\(playerNode.name) : \(playerNode.categoryBitMask) : \(playerNode.presentation.convertPosition(SCNVector3(0.5, 0.5, 0.5), to: rootNode))")
+//                    print("\(contactNode.name) : \(contactNode.categoryBitMask) : \(contactNode.presentation.convertPosition(SCNVector3(0.5, 0.5, 0.5), to: rootNode))")
+//                    
                   
                     let playerPos = playerNode.presentation.convertPosition(SCNVector3(0.5, 0.5, 0.5), to: self.world)
                     let nodePos = contactNode.presentation.convertPosition(SCNVector3(0.5, 0.5, 0.5), to: self.world)

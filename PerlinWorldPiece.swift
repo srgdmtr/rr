@@ -115,6 +115,22 @@ class PerlinWorldPiece: SCNNode {
                     }
                 }
             }
+            //tmp
+            let box = SCNBox(width: CGFloat(Cube.side), height: CGFloat(Cube.side), length: CGFloat(Cube.side), chamferRadius: 0)
+            let enemy = Cube(index: (-1, -1, -1))
+            self.addChildNode(enemy)
+            enemy.geometry = box
+            enemy.name = "enemy"
+            enemy.geometry?.firstMaterial?.shininess = 1.0
+            enemy.position =  SCNVector3(Float(Int.random(in: 0..<PerlinWorldPiece.width)) * cs - corr, Float(6) * cs - corr, Float(Int.random(in: 0..<PerlinWorldPiece.length)) * cs - corr)
+            enemy.physicsBody = SCNPhysicsBody(type: .dynamic, shape: SCNPhysicsShape(geometry: box, options: nil))
+            enemy.physicsBody?.categoryBitMask = PhysicsCategory.enemy.rawValue
+            enemy.physicsBody?.collisionBitMask = PhysicsCategory.player.rawValue | PhysicsCategory.staticCube.rawValue
+            enemy.physicsBody?.contactTestBitMask = PhysicsCategory.staticCube.rawValue
+            enemy.geometry?.firstMaterial?.diffuse.contents = UIColor.white
+            //self.physicsBody?.damping = 0
+            //physicsBody?.velocity = SCNVector3(0, 0, 0)
+            enemy.physicsBody?.mass = 60
         }
     }
 

@@ -50,9 +50,13 @@ class GameScene: SCNScene, SCNPhysicsContactDelegate {
         addOverlay()
         setContents()
         
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.handleTap(_:)))
+        tapGestureRecognizer.numberOfTapsRequired = 1
+        view.addGestureRecognizer(tapGestureRecognizer)
+        
         sceneView.isPlaying = true
     }
-    
+   
     private func setContents() {
         //sceneView.allowsCameraControl = true
         sceneView.showsStatistics = true
@@ -69,7 +73,7 @@ class GameScene: SCNScene, SCNPhysicsContactDelegate {
         player.position = SCNVector3(x: 0, y:  Float(Cube.side) * 2, z: averageLenght / 2 - Float(Cube.side / 2))
 
         world.addChildNode(worldUpdtaeTriggerNode)
-        worldUpdtaeTriggerNode.position = SCNVector3(0, 0, player.position.z + Float(Cube.side * 3))
+        worldUpdtaeTriggerNode.position = SCNVector3(0, 0, player.position.z + Float(Cube.side * 6))
 
         cameraNode.camera = SCNCamera()
         world.addChildNode(cameraNode)
@@ -77,7 +81,8 @@ class GameScene: SCNScene, SCNPhysicsContactDelegate {
         cameraNode.position = SCNVector3(x: 0, y: Float(Cube.side) * 4, z: player.position.z + Float(Cube.side * 8))
         cameraNode.eulerAngles.x = -.pi / 6
 
-        //world.handleMovement(true)
+        
+        world.handleMovement(true)
         
     }
     
@@ -104,20 +109,6 @@ class GameScene: SCNScene, SCNPhysicsContactDelegate {
         ambientLightNode.light!.type = .ambient
         ambientLightNode.light!.color = UIColor.darkGray
         rootNode.addChildNode(ambientLightNode)
-    }
-    
-    private func addGround() {
-        let groundBox = SCNBox(width: CGFloat(Cube.side * 400), height: 1, length: CGFloat(Cube.side * 160), chamferRadius: 0)
-        let groundNode = SCNNode(geometry: groundBox)
-        groundNode.position = SCNVector3Make(0, -Float(Cube.side * PerlinWorldPiece.width) / 2 - 1 / 2, 0)
-        //groundNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: groundBox, options: nil))
-        //groundNode.physicsBody?.restitution = 0.0
-        //groundNode.physicsBody?.friction = 1.0
-//        groundNode.geometry?.firstMaterial?.diffuse.contents = UIColor.purple
-//        groundNode.physicsBody?.categoryBitMask = PhysicsCategory.ground.rawValue
-//        groundNode.physicsBody?.friction = 0
-        groundNode.name = "ground"
-        rootNode.addChildNode(groundNode)
     }
     
     func physicsWorld(_ world: SCNPhysicsWorld, didBegin contact: SCNPhysicsContact) {
@@ -171,7 +162,6 @@ class GameScene: SCNScene, SCNPhysicsContactDelegate {
                         }
                         endGame()
                     }
-                    
             default :
                 break
             }
@@ -189,8 +179,21 @@ class GameScene: SCNScene, SCNPhysicsContactDelegate {
         }
     }
     
-    
-
+    @objc func handleTap(_ sender: UITapGestureRecognizer? = nil) {
+        guard let sender = sender else { return }
+        if sender.state == .ended {
+            let touchLocation: CGPoint = sender.location(in: sceneView)
+            let results = sceneView.hitTest(touchLocation, options: [.searchMode : 1])
+            
+            results.forEach {
+                if let pb = $0.node.physicsBody {
+                    if pb.categoryBitMask == PhysicsCategory.enemy.rawValue {
+                        $0.node.geometry?.firstMaterial?.diffuse.contents = UIColor.red
+                    }
+                }
+            }
+        }
+    }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")

@@ -57,17 +57,19 @@ class CanvasView: UIView {
     
     func OnMainViewTouchEnded(_ point: CGPoint) {
         points.append(point)
-        if let dir = swipeDirection() {
-            delegate?.didSwiped(dir)
-        } else {
-            let renderer = UIGraphicsImageRenderer(bounds: self.bounds)
-            let image = renderer.image { rendererContext in
-                self.layer.render(in: rendererContext.cgContext)
+        if points.count > 2 {
+            if let dir = swipeDirection() {
+                delegate?.didSwiped(dir)
+            } else {
+                let renderer = UIGraphicsImageRenderer(bounds: self.bounds)
+                let image = renderer.image { rendererContext in
+                    self.layer.render(in: rendererContext.cgContext)
+                }
+                drawingPath.close()
+                mainImageView.image = image
+                
+                delegate?.didEndDrawing()
             }
-            drawingPath.close()
-            mainImageView.image = image
-            
-            delegate?.didEndDrawing()
         }
     }
     
@@ -115,28 +117,22 @@ class CanvasView: UIView {
     private func pointOnLine(pt1: CGPoint, pt2: CGPoint, pt: CGPoint) -> Bool {
         let d: CGFloat = 25
         
-        if (pt.x - max(pt1.x, pt2.x) > d ||
-                min(pt1.x, pt2.x) - pt.x > d ||
-                pt.y - max(pt1.y, pt2.y) > d ||
-                min(pt1.y, pt2.y) - pt.y > d) {
+        if (pt.x - max(pt1.x, pt2.x) > d || min(pt1.x, pt2.x) - pt.x > d || pt.y - max(pt1.y, pt2.y) > d || min(pt1.y, pt2.y) - pt.y > d) {
             return false
         }
 
-
         if abs(pt2.x - pt1.x) < d {
-            let result = abs(pt1.x - pt.x) < d || abs(pt2.x - pt.x) < d
-            return result
+            return abs(pt1.x - pt.x) < d || abs(pt2.x - pt.x) < d
         }
+        
         if abs(pt2.y - pt1.y) < d {
-            let result = abs(pt1.y - pt.y) < d || abs(pt2.y - pt.y) < d
-            return result
+            return abs(pt1.y - pt.y) < d || abs(pt2.y - pt.y) < d
         }
 
         let x: CGFloat = pt1.x + (pt.y - pt1.y) * (pt2.x - pt1.x) / (pt2.y - pt1.y)
         let y: CGFloat = pt1.y + (pt.x - pt1.x) * (pt2.y - pt1.y) / (pt2.x - pt1.y)
 
-        let result = abs(pt.x - x) < d || abs(pt.y - y) < d
-        return result
+        return abs(pt.x - x) < d || abs(pt.y - y) < d
     }
     
     private func drawLine(from fromPoint: CGPoint, to toPoint: CGPoint) {

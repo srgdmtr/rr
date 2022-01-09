@@ -66,24 +66,6 @@ class OverlayScene: SKScene {
             canvasView.bottomAnchor.constraint(equalTo: view.topAnchor),
             canvasView.heightAnchor.constraint(equalTo: view.heightAnchor)
         ])
-        
-       
-        
-//        let swipeGestureRecognizerLeft = UISwipeGestureRecognizer(target: self, action: #selector(self.respondToSwipeGesture))
-//        view.addGestureRecognizer(swipeGestureRecognizerLeft)
-//        swipeGestureRecognizerLeft.direction = .left
-//        
-//        let swipeGestureRecognizerRight = UISwipeGestureRecognizer(target: self, action: #selector(self.respondToSwipeGesture))
-//        view.addGestureRecognizer(swipeGestureRecognizerRight)
-//        swipeGestureRecognizerRight.direction = .right
-//        
-//        let swipeGestureRecognizerUp = UISwipeGestureRecognizer(target: self, action: #selector(self.respondToSwipeGesture))
-//        view.addGestureRecognizer(swipeGestureRecognizerUp)
-//        swipeGestureRecognizerUp.direction = .up
-//        
-//        let swipeGestureRecognizerDown = UISwipeGestureRecognizer(target: self, action: #selector(self.respondToSwipeGesture))
-//        view.addGestureRecognizer(swipeGestureRecognizerDown)
-//        swipeGestureRecognizerDown.direction = .down
     }
     
     func classify(image: UIImage) {
@@ -119,7 +101,6 @@ class OverlayScene: SKScene {
             }
         }
     }
-   
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)

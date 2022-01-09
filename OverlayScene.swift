@@ -25,7 +25,7 @@ class OverlayScene: SKScene {
             
             let visionModel = try VNCoreMLModel(for: MyImageClassifier(configuration: MLModelConfiguration()).model)
             let request = VNCoreMLRequest(model: visionModel, completionHandler: { [weak self] request, error in
-                print("Request is finished!", request.results as Any)
+                self?.isRecoqnizing = false
                 self?.processObservations(for: request, error: error)
             })
             request.imageCropAndScaleOption = .centerCrop
@@ -34,15 +34,7 @@ class OverlayScene: SKScene {
             fatalError("Failed to create VNCoreMLModel: \(error)")
         }
     }()
-    
-//    override var isUserInteractionEnabled: Bool {
-//            get { return true }
-//            set { }
-//        }
-    
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+    private var isRecoqnizing: Bool = false
     
     override init(size: CGSize) {
         super.init(size: size)
@@ -73,6 +65,7 @@ class OverlayScene: SKScene {
             print("Unable to create CIImage")
             return
         }
+        isRecoqnizing = true
         DispatchQueue.global(qos: .userInitiated).async {
             let handler = VNImageRequestHandler(ciImage: ciImage, orientation: .up)
             do {
@@ -87,17 +80,17 @@ class OverlayScene: SKScene {
         DispatchQueue.main.async {
             if let results = request.results as? [VNClassificationObservation] {
                 if results.isEmpty {
-                    self.resultsLabel.text = "nothing found"
+                    print("nothing found")
                 } else {
-                    results.forEach { it in
-                        print("\(it.identifier): \(it.confidence)")
-                    }
-                    self.resultsLabel.text = "\(results[0].identifier): \(results[0].confidence)"
+//                    results.forEach { it in
+//                        print("\(it.identifier): \(it.confidence)")
+//                    }
+                    print("\(results[0].identifier): \(results[0].confidence)")
                 }
             } else if let error = error {
-                self.resultsLabel.text = "error: \(error.localizedDescription)"
+                print("error: \(error.localizedDescription)")
             } else {
-                self.resultsLabel.text = "???"
+                print("???")
             }
         }
     }
@@ -123,6 +116,10 @@ class OverlayScene: SKScene {
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
     
     }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
 }
 
@@ -132,17 +129,24 @@ extension OverlayScene: CanvasDelegate {
     }
     
     func didEndDrawing() {
-        guard let view = view, let img = canvasView.snapshot() else { return }
-        classify(image: img)
-        
+        if !isRecoqnizing {
+            guard let view = view, let img = canvasView.snapshot() else { return }
+            classify(image: img)
+            
             let imgView = UIImageView(image: img)
             view.addSubview(imgView)
             imgView.backgroundColor = .red
-            imgView.center = view.center
+            imgView.contentScaleFactor = 0.5
+            imgView.frame.origin.x = 0
+            imgView.frame.origin.y = view.frame.size.height - imgView.bounds.height
             
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [unowned self] in
-            imgView.removeFromSuperview()
-            self.canvasView.clear()
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [unowned self] in
+                imgView.removeFromSuperview()
+                self.canvasView.clear()
+            }
         }
+            
+        
     }
 }

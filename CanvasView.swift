@@ -71,6 +71,7 @@ class CanvasView: UIView {
                 delegate?.didEndDrawing()
             }
         }
+        points.removeAll()
     }
     
     private func swipeDirection() -> UISwipeGestureRecognizer.Direction? {
@@ -148,7 +149,7 @@ class CanvasView: UIView {
     }
     
     func clear() {
-        points.removeAll()
+//        points.removeAll()
         guard let sublayers = self.layer.sublayers else { return }
         for layer in sublayers {
             if let shapeLayer = layer as? CAShapeLayer, shapeLayer != self.layer {

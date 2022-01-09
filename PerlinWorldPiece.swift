@@ -17,7 +17,7 @@ class PerlinWorldPiece: SCNNode {
     
     static var index: Int = -1
     var cubes: [[Cube]] = []
-    let moveForwardAction = SCNAction.repeatForever(SCNAction.move(by: SCNVector3(0, 0, 20), duration: 1))
+    let moveForwardAction = SCNAction.repeatForever(SCNAction.move(by: SCNVector3(0, 0, 10), duration: 1))
     var frontContactPlaneNode = SCNNode()
     
     func createNoiseMap() -> GKNoiseMap {
@@ -67,11 +67,15 @@ class PerlinWorldPiece: SCNNode {
                 for z in 0 ..< PerlinWorldPiece.length {
                     let cube = Cube(index: (x, 0, z))
                     self.addChildNode(cube)
+                    cube.name = "perlinStaticCube"
                     cube.position = SCNVector3(Float(x) * cs - corr, -corr, Float(z) * cs - corr)
                     cube.setColor(.orange)
                     cube.physicsBody = SCNPhysicsBody(type: .kinematic, shape: nil)
                     cube.physicsBody?.categoryBitMask = PhysicsCategory.staticCube.rawValue
-                    cube.name = "perlinStaticCube"
+                    cube.physicsBody?.collisionBitMask = PhysicsCategory.player.rawValue
+                    cube.physicsBody?.angularVelocityFactor = SCNVector3(0, 0, 0)
+                    cube.physicsBody?.mass = 100
+                    
                 }
             }
         } else {
@@ -126,10 +130,10 @@ class PerlinWorldPiece: SCNNode {
             enemy.physicsBody = SCNPhysicsBody(type: .dynamic, shape: SCNPhysicsShape(geometry: box, options: nil))
             enemy.physicsBody?.categoryBitMask = PhysicsCategory.enemy.rawValue
             enemy.physicsBody?.collisionBitMask = PhysicsCategory.player.rawValue | PhysicsCategory.staticCube.rawValue
-            enemy.physicsBody?.contactTestBitMask = PhysicsCategory.staticCube.rawValue
+            //enemy.physicsBody?.contactTestBitMask = PhysicsCategory.staticCube.rawValue
             enemy.geometry?.firstMaterial?.diffuse.contents = UIColor.white
             //self.physicsBody?.damping = 0
-            //physicsBody?.velocity = SCNVector3(0, 0, 0)
+            physicsBody?.velocity = SCNVector3(0, 0, 0)
             enemy.physicsBody?.mass = 60
         }
     }

@@ -198,7 +198,7 @@ class GameScene: SCNScene, SCNPhysicsContactDelegate {
 }
 
 extension GameScene: OverlaySceneDelegate {
-    func didSwiped(_ direction: UISwipeGestureRecognizer.Direction) {
+    func respondToSwipe(_ direction: UISwipeGestureRecognizer.Direction) {
         switch direction {
             case .left:
                 player.moveTo(.left)

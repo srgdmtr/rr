@@ -9,15 +9,17 @@ import UIKit
 
 protocol CanvasDelegate {
     func didEndDrawing()
+    func didSwiped(_ dir: UISwipeGestureRecognizer.Direction)
 }
 
 class CanvasView: UIView {
     private var lastPoint: CGPoint = .zero
     private var drawingPath = UIBezierPath()
-    private var invisibleDrawingLayer: CAShapeLayer = CAShapeLayer()
+    private let invisibleDrawingLayer = CAShapeLayer()
     private let mainImageView = UIImageView()
     var delegate: CanvasDelegate?  = nil
-    var amplitudes: (CGPoint, CGPoint) = (.zero, .zero)
+    private var amplitudes: (CGPoint, CGPoint) = (.zero, .zero)
+    private var points: [CGPoint] = []
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -37,15 +39,16 @@ class CanvasView: UIView {
     
     
     func OnMainViewTouchBegan(_ point: CGPoint) {
+        points.removeAll()
         lastPoint = point
         amplitudes.0 = point
-        invisibleDrawingLayer = CAShapeLayer()
+        points.append(point)
         drawingPath = UIBezierPath()
         layer.addSublayer(invisibleDrawingLayer)
     }
     
     func OnMainViewTouchMoved(_ point: CGPoint) {
-        print(point)
+        points.append(point)
         drawLine(from: lastPoint, to: point)
         lastPoint = point
         
@@ -53,14 +56,87 @@ class CanvasView: UIView {
     }
     
     func OnMainViewTouchEnded(_ point: CGPoint) {
-        let renderer = UIGraphicsImageRenderer(bounds: self.bounds)
-        let image = renderer.image { rendererContext in
-            self.layer.render(in: rendererContext.cgContext)
+        points.append(point)
+        if let dir = swipeDirection() {
+            delegate?.didSwiped(dir)
+        } else {
+            let renderer = UIGraphicsImageRenderer(bounds: self.bounds)
+            let image = renderer.image { rendererContext in
+                self.layer.render(in: rendererContext.cgContext)
+            }
+            drawingPath.close()
+            mainImageView.image = image
+            
+            delegate?.didEndDrawing()
         }
-        drawingPath.close()
-        mainImageView.image = image
+    }
+    
+    private func swipeDirection() -> UISwipeGestureRecognizer.Direction? {
+        let samplesCount: Int = 6
+        guard points.count > samplesCount else { return nil }
+        let interval: (CGPoint, CGPoint) = (points.first!, points.last!)
+        var samplePoints: [CGPoint] = []
+        for i in 1..<samplesCount {
+            let ind = i * points.count / samplesCount - 1
+            guard ind < points.count - 1 else { return nil }
+            samplePoints.append(points[ind])
+        }
         
-        delegate?.didEndDrawing()
+        let delta: CGFloat = 30 
+        var dir: UISwipeGestureRecognizer.Direction? = nil
+        var isLine = true
+        for p in samplePoints {
+            if !pointOnLine(pt1: interval.0, pt2: interval.1, pt: p) {
+                isLine = false
+                break
+            }
+        }
+        
+        if isLine {
+            if abs(interval.0.x - interval.1.x) < delta {
+                if interval.0.y < interval.1.y {
+                    dir = .down
+                } else {
+                    dir = .up
+                }
+            } else if abs(interval.0.y - interval.1.y) < delta {
+                if interval.0.x < interval.1.x {
+                    dir = .right
+                } else {
+                    dir = .left
+                }
+            }
+        }
+  
+        return dir
+    }
+    
+    
+    private func pointOnLine(pt1: CGPoint, pt2: CGPoint, pt: CGPoint) -> Bool {
+        let d: CGFloat = 25
+        
+        if (pt.x - max(pt1.x, pt2.x) > d ||
+                min(pt1.x, pt2.x) - pt.x > d ||
+                pt.y - max(pt1.y, pt2.y) > d ||
+                min(pt1.y, pt2.y) - pt.y > d) {
+            return false
+        }
+
+
+        if abs(pt2.x - pt1.x) < d {
+            let result = abs(pt1.x - pt.x) < d || abs(pt2.x - pt.x) < d
+            return result
+        }
+        if abs(pt2.y - pt1.y) < d {
+            let result = abs(pt1.y - pt.y) < d || abs(pt2.y - pt.y) < d
+            return result
+        }
+
+        let x: CGFloat = pt1.x + (pt.y - pt1.y) * (pt2.x - pt1.x) / (pt2.y - pt1.y)
+        let y: CGFloat = pt1.y + (pt.x - pt1.x) * (pt2.y - pt1.y) / (pt2.x - pt1.y)
+
+        let result = abs(pt.x - x) < d || abs(pt.y - y) < d
+        return result
     }
     
     private func drawLine(from fromPoint: CGPoint, to toPoint: CGPoint) {
@@ -76,6 +152,7 @@ class CanvasView: UIView {
     }
     
     func clear() {
+        points.removeAll()
         guard let sublayers = self.layer.sublayers else { return }
         for layer in sublayers {
             if let shapeLayer = layer as? CAShapeLayer, shapeLayer != self.layer {

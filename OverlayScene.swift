@@ -10,7 +10,7 @@ import Vision
 
 
 protocol OverlaySceneDelegate: AnyObject {
-    func didSwiped(_ direction: UISwipeGestureRecognizer.Direction)
+    func respondToSwipe(_ direction: UISwipeGestureRecognizer.Direction)
 }
 
 class OverlayScene: SKScene {
@@ -130,7 +130,6 @@ class OverlayScene: SKScene {
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesMoved(touches, with: event)
         guard let touch = touches.first?.location(in: view) else { return }
-        print(touch)
         canvasView.OnMainViewTouchMoved(touch)
     }
     
@@ -140,40 +139,29 @@ class OverlayScene: SKScene {
         canvasView.OnMainViewTouchEnded(touch)
     }
     
-    
-    
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
     
     }
-    
-    @objc func respondToSwipeGesture(recognizer: UISwipeGestureRecognizer) {
-        overlaySceneDelegate?.didSwiped(recognizer.direction)
-    }
+
 }
 
 extension OverlayScene: CanvasDelegate {
+    func didSwiped(_ dir: UISwipeGestureRecognizer.Direction) {
+        overlaySceneDelegate?.respondToSwipe(dir)
+    }
+    
     func didEndDrawing() {
         guard let view = view, let img = canvasView.snapshot() else { return }
         classify(image: img)
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [unowned self] in
             let imgView = UIImageView(image: img)
             view.addSubview(imgView)
             imgView.backgroundColor = .red
             imgView.center = view.center
             
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [unowned self] in
-                imgView.removeFromSuperview()
-                self.canvasView.clear()
-            }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [unowned self] in
+            imgView.removeFromSuperview()
+            self.canvasView.clear()
         }
-        
-        
-        
-        
-        
-
-        
-        
     }
 }
